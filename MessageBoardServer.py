@@ -23,7 +23,7 @@ def handle_response(client_socket):
         response = client_socket.recv(1024)
         if response:
             response_str = response.decode('utf-8').strip()
-            print(f"server: {response_str}")  # 打印接收到的响应
+            print(f"server: {response_str}")
             return response_str
         else:
             print("No data received, connection might be closed.")
@@ -57,6 +57,20 @@ def handle_post(client_socket):
     except KeyboardInterrupt:
         print("\nExiting...")
 
+def handle_delete(client_socket):
+    try:
+        send_command(client_socket, "DELETE", "")
+        while True:
+            user_input = input("client: ")
+
+            if (user_input == '#'): 
+                send_command(client_socket, "", user_input + '\n')
+                handle_response(client_socket)
+                break
+            else:
+                send_command(client_socket, "", user_input)
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 # Main function to run the client
 def main():
@@ -83,6 +97,8 @@ def main():
                     response = handle_response(client_socket)
                     if response == "#":
                         break
+            elif command == 'DELETE':
+                handle_delete(client_socket)
             elif command == 'QUIT':
                 send_command(client_socket, "QUIT", "")
                 response = handle_response(client_socket)
@@ -90,7 +106,7 @@ def main():
                     close_socket(client_socket)
                     break
             else:
-                print("ERROR - Command not understood2")
+                print("ERROR - Command not understood")
         except KeyboardInterrupt:
             print("\nProgram terminated by user.")
             break
