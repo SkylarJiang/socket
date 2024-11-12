@@ -79,15 +79,13 @@ def main():
                 handle_post(client_socket)
             elif command == 'GET':
                 send_command(client_socket, "GET", "")
-                response = handle_response(client_socket)
                 while True:
                     response = handle_response(client_socket)
-                    if response == "END":
+                    if response == "#":
                         break
             elif command == 'QUIT':
                 send_command(client_socket, "QUIT", "")
                 response = handle_response(client_socket)
-                print(response)
                 if response == "OK":
                     close_socket(client_socket)
                     break
