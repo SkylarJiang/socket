@@ -13,11 +13,10 @@ def connect_to_server(client_socket, server_ip, server_port):
     client_socket.connect(server_address)
 
 # Task 3: Send command to the server
-def send_command(client_socket, command, data):
-    full_command = f"{command} {data}\n"
-    client_socket.sendall(full_command.encode('utf-8'))
+def send_command(client_socket, msg):
+    client_socket.sendall(msg.encode('utf-8'))
 
-# Task 4: Handle server response
+# Task 4: Receive the message from the server
 def handle_response(client_socket):
     try:
         response = client_socket.recv(1024)
@@ -29,90 +28,58 @@ def handle_response(client_socket):
             print("No data received, connection might be closed.")
             return ""
     except socket.timeout:
-        # print("Receive timed out, no data received within the timeout period.")
-        return ""
-    except UnicodeDecodeError:
-        print("Received data is not valid UTF-8 encoded.")
+        print("Receive timed out, no data received within the timeout period.")
         return ""
     except Exception as e:
         print(f"An error occurred: {e}")
         return ""
 
-# Task 5: Close socket
-def close_socket(client_socket):
-    client_socket.close()
-
-def handle_post(client_socket):
-    try:
-        send_command(client_socket, "POST", "")
-        while True:
-            user_input = input("client: ")
-
-            if (user_input == '#'): 
-                send_command(client_socket, "", user_input + '\n')
-                handle_response(client_socket)
-                break
-            else:
-                send_command(client_socket, "", user_input)
-    except KeyboardInterrupt:
-        print("\nExiting...")
-
-def handle_delete(client_socket):
-    try:
-        send_command(client_socket, "DELETE", "")
-        while True:
-            user_input = input("client: ")
-
-            if (user_input == '#'): 
-                send_command(client_socket, "", user_input + '\n')
-                handle_response(client_socket)
-                break
-            else:
-                send_command(client_socket, "", user_input)
-    except KeyboardInterrupt:
-        print("\nExiting...")
+# Handle the data input by users in POST and DELETE
+def handle_input(client_socket):
+    while True:
+        user_input = input("client: ")
+        send_command(client_socket, user_input)
+        if (user_input == '#'): 
+            handle_response(client_socket)
+            break
 
 # Main function to run the client
 def main():
     if len(sys.argv) != 3:
-        # print("Usage: MessageBoardClient <server_ip> <server_port>")
-        # sys.exit(1)
-        server_ip = '127.0.0.1'
-        server_port = 16111
+        print("Usage: MessageBoardClient <server_ip> <server_port>")
+        sys.exit(1)
     else:
         server_ip = sys.argv[1]
         server_port = int(sys.argv[2])
 
     client_socket = create_socket()
-    connect_to_server(client_socket, server_ip, server_port)
 
-    while True:
-        try:
+    try:
+        connect_to_server(client_socket, server_ip, server_port)
+
+        while True:
             command = input("client: ").upper()
-            if command == 'POST':
-                handle_post(client_socket)
+            send_command(client_socket, command)
+            if command == 'POST' or command == 'DELETE':
+                handle_input(client_socket)
             elif command == 'GET':
-                send_command(client_socket, "GET", "")
                 while True:
                     response = handle_response(client_socket)
                     if response == "#":
                         break
-            elif command == 'DELETE':
-                handle_delete(client_socket)
             elif command == 'QUIT':
-                send_command(client_socket, "QUIT", "")
                 response = handle_response(client_socket)
                 if response == "OK":
-                    close_socket(client_socket)
+                    # Task 5: Close socket
+                    client_socket.close()
                     break
             else:
-                print("ERROR - Command not understood")
-        except KeyboardInterrupt:
-            print("\nProgram terminated by user.")
-            break
-        except Exception as e:
-            print(f"An error occurred: {e}")
-
+                handle_response(client_socket)
+    except KeyboardInterrupt:
+        print("\nProgram terminated by user.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        client_socket.close()
 
 if __name__ == "__main__":
     main()
