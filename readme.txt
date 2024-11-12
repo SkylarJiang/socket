@@ -4,7 +4,7 @@ How to Run the Client:
 
 1. Prerequisites:
    - Python 3.x must be installed.
-   - The server should be running and accessible at the specified IP and port.
+   - The server should be running.
 
 2. Running the Client:
    - Open a terminal or command prompt.
