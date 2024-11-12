@@ -15,6 +15,6 @@ How to Run the Client:
 3. Using the Client:
    - After running the client, you will be prompted to enter commands. Available commands are:
      - POST: To start posting messages to the server. Type messages followed by '#' to finish posting.
-     - GET: To retrieve messages from the server. Messages will be displayed until a '#' is received.
+     - GET: To retrieve messages from the server.
      - DELETE: To delete messages from the server. Type message IDs followed by '#' to finish deleting.
      - QUIT: To quit the session and close the connection to the server.
