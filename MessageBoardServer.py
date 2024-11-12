@@ -20,18 +20,16 @@ def send_command(client_socket, command, data):
 # Task 4: Handle server response
 def handle_response(client_socket):
     try:
-        print(66)
         response = client_socket.recv(1024)
-        print(55555555)
         if response:
             response_str = response.decode('utf-8').strip()
-            print(f"Server response: {response_str}")  # 打印接收到的响应
+            print(f"server: {response_str}")  # 打印接收到的响应
             return response_str
         else:
             print("No data received, connection might be closed.")
             return ""
     except socket.timeout:
-        print("Receive timed out, no data received within the timeout period.")
+        # print("Receive timed out, no data received within the timeout period.")
         return ""
     except UnicodeDecodeError:
         print("Received data is not valid UTF-8 encoded.")
@@ -48,8 +46,14 @@ def handle_post(client_socket):
     try:
         send_command(client_socket, "POST", "")
         while True:
-            user_input = input("")
-            send_command(client_socket, "", user_input)
+            user_input = input("client: ")
+
+            if (user_input == '#'): 
+                send_command(client_socket, "", user_input + '\n')
+                handle_response(client_socket)
+                break
+            else:
+                send_command(client_socket, "", user_input)
     except KeyboardInterrupt:
         print("\nExiting...")
 
@@ -57,18 +61,20 @@ def handle_post(client_socket):
 # Main function to run the client
 def main():
     if len(sys.argv) != 3:
-        print("Usage: MessageBoardClient <server_ip> <server_port>")
-        sys.exit(1)
-
-    server_ip = sys.argv[1]
-    server_port = int(sys.argv[2])
+        # print("Usage: MessageBoardClient <server_ip> <server_port>")
+        # sys.exit(1)
+        server_ip = '127.0.0.1'
+        server_port = 16111
+    else:
+        server_ip = sys.argv[1]
+        server_port = int(sys.argv[2])
 
     client_socket = create_socket()
     connect_to_server(client_socket, server_ip, server_port)
 
     while True:
         try:
-            command = input("").upper()
+            command = input("client: ").upper()
             if command == 'POST':
                 handle_post(client_socket)
             elif command == 'GET':
